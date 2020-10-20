@@ -1,11 +1,13 @@
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 const { graphqlHTTP } = require('express-graphql');
 const { buildSchema } = require('graphql');
 const port = 8000;
 
 app.use(bodyParser.json());
+const Bus = require('./models/bus.models');
 let notifications = [];
 app.use('/graphql', graphqlHTTP({
     schema: buildSchema(`
@@ -42,19 +44,27 @@ app.use('/graphql', graphqlHTTP({
             return notifications;
         },
         createFamily (args){
-            const notification = {
+            const notification = new Bus({
                 id: Math.random().toString(),
                 title: args.Noo.title,
                 place: args.Noo.place,
                 time: args.Noo.time,
-            };
-            notifications.push(notification);
-            return notification;
+            });
+            return notification.save().then(result=>{
+                console.log({...result._doc});
+                return {...result._doc}
+            }).catch(error=>{
+                console.log(error);
+            })
         }
     },
     graphiql: true
 }));
 
-app.listen(port,()=>{
-    console.log('Server is Running on ' + port);
+mongoose.connect('mongodb://localhost:27017/MyIUB', {useNewUrlParser: true, useUnifiedTopology: true}).then(
+    app.listen(port,()=>{
+        console.log('Server is Running on ' + port);
+    })
+).catch(err =>{
+    console.log(err);
 })
