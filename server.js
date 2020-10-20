@@ -6,16 +6,31 @@ const { buildSchema } = require('graphql');
 const port = 8000;
 
 app.use(bodyParser.json());
-
+let notifications = [];
 app.use('/graphql', graphqlHTTP({
-    schema: buildSchema(`  
+    schema: buildSchema(`
+    
+        type NotificationAlert{
+            id: ID!
+            title: String!
+            place: String!
+            time: String!
+        }
+    
+        input NoficationInput{
+            title: String!
+            place: String!
+            time: String!
+        }
+
         type rootQuery{
-            family: [String!]!
+            family: [NotificationAlert!]!
         }
         
         type rootMutation{
-            createFamily(name: String): String
+            createFamily(Noo: NoficationInput): NotificationAlert
         }
+        
 
         schema {
             query: rootQuery
@@ -24,11 +39,17 @@ app.use('/graphql', graphqlHTTP({
     `),
     rootValue: {
         family: ()=>{
-            return ['Aslam','Amna','Shama','Nusrat'];
+            return notifications;
         },
-        createFamily: (args)=>{
-            const Name = args.name;
-            return Name;
+        createFamily (args){
+            const notification = {
+                id: Math.random().toString(),
+                title: args.Noo.title,
+                place: args.Noo.place,
+                time: args.Noo.time,
+            };
+            notifications.push(notification);
+            return notification;
         }
     },
     graphiql: true
