@@ -14,6 +14,10 @@ const busSchema = new Schema({
         type: String,
         required: true,
     },
+    createdBy: {
+        type: Schema.Types.ObjectId,
+        ref: 'BusMembers',
+    }
 })
 
 const Busmodel = mongoose.model('BusNotification', busSchema);
